@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const MAX_FILE_SIZE_MB = 10;
+    const MAX_FILE_SIZE_MB = 4;
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       return NextResponse.json(
         {

@@ -21,7 +21,7 @@ export default function Home() {
   const [asking, setAsking] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const MAX_FILE_SIZE_MB = 10;
+  const MAX_FILE_SIZE_MB = 4;
 
   function validateAndSetFile(selected: File | null) {
     if (!selected) return;
@@ -51,7 +51,27 @@ export default function Home() {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+
+      // Vercel rejects oversized requests before our code even runs,
+      // returning a 413 status with a non-JSON body - handle that explicitly.
+      if (res.status === 413) {
+        setUploadError(
+          `File is too large. Please upload a PDF under ${MAX_FILE_SIZE_MB}MB.`
+        );
+        setDocReady(false);
+        return;
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        setUploadError(
+          `Upload failed - the file may be too large (max ${MAX_FILE_SIZE_MB}MB) or something went wrong on the server.`
+        );
+        setDocReady(false);
+        return;
+      }
 
       if (!res.ok) {
         setUploadError(data.error || "Upload failed");
@@ -145,6 +165,7 @@ export default function Home() {
           className="hidden"
         />
 
+        {/* <p className="text-sm mb-1 ml-1">(4MB Max)</p> */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -153,7 +174,9 @@ export default function Home() {
             Choose file
           </button>
           <span className="text-sm text-muted font-mono truncate">
-            {file ? file.name : "no file selected"}
+            {file
+              ? `${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`
+              : "no file selected"}
           </span>
           <button
             onClick={handleUpload}
@@ -163,6 +186,10 @@ export default function Home() {
             {uploading ? "Processing…" : "Upload"}
           </button>
         </div>
+
+        <p className="text-xs text-muted font-mono mt-2">
+          PDF only · max {MAX_FILE_SIZE_MB}MB
+        </p>
 
         {uploadError && (
           <p className="mt-3 text-sm text-accent-bright border-l-2 border-accent-bright pl-2.5">
