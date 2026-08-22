@@ -1,5 +1,6 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
 import { useState, useRef } from "react";
 
 type Message = {
@@ -278,7 +279,13 @@ export default function Home() {
                 <span className="block font-mono text-[10px] tracking-widest uppercase text-muted mb-1.5">
                   {m.role === "user" ? "You" : "Assistant"}
                 </span>
-                {m.content}
+                {m.role === "assistant" ? (
+                  <div className="prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-li:my-0.5">
+                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  m.content
+                )}
               </div>
             ))}
             {asking && (
