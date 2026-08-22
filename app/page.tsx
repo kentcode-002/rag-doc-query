@@ -138,7 +138,7 @@ export default function Home() {
         </h1>
       </div>
       <h2 className="font-display italic text-3xl text-ink mb-6 leading-snug">
-        Ask your document a question.
+        Ask your assistant a question.
       </h2>
 
       {/* Tabs */}
